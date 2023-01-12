@@ -1,0 +1,39 @@
+{% extends "shared/base.html" %}
+{% block head %}
+<script>
+    $(document).ready(function () {
+        $('select').formSelect();
+    });
+
+</script>
+{% endblock %}
+{% block body %}
+{% include "aopcore/shared/nav.html" %}
+{% if alert %}
+<p style="color:red">{{ alert }}</p>
+{% endif %}
+<form action="/intake/aop-abuser/" method="post">
+    {% csrf_token %}
+    <input id="name" name="name" type="text" class="validate" required="">
+    <label for="name">Name</label>
+    <input id="occupation" name="occupation" type="text" class="validate" required="">
+    <label for="occupation">Occupation</label>
+    <input id="workplace" name="workplace" type="text" class="validate">
+    <label for="workplace">Workplace</label>
+    <br>
+    <h5>Or</h5>
+    <br>
+    <label for="id_workplace_choice">Workplace Choice</label>
+    {{ form.workplace_choice }}
+    <input id="age" name="age" type="number" class="validate">
+    <label for="age">Age</label>
+    <input id="picture" name="picture" type="url" class="validate">
+    <label for="picture">Picture (url of picture)</label>
+    <input id="badgeOr" name="badgeOr" type="text" class="validate">
+    <label for="badgeOr">Badge number or other idetnifying information</label>
+    <br>
+    <br>
+    <button class="btn waves-effect waves-light" type="submit" name="action">Submit</button>
+    <br />
+</form>
+{% endblock %}

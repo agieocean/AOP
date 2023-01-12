@@ -1,0 +1,34 @@
+{% extends "shared/base.html" %}
+{% block body %}
+{% include "aopcore/shared/nav.html" %}
+    <table>
+        <tr>
+            <th>Object type</th>
+            <th>Unapproved object numbers</th>
+        </tr>
+        <tr>
+            <td>Abusers</td>
+            <td>
+                {% for abuser in abusers %}
+                <p>{{ abuser }}</p>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Reports</td>
+            <td>
+                {% for report in reports %}
+                <p>{{ report }}</p>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Workplaces</td>
+            <td>
+                {% for workplace in workplaces %}
+                <p>{{ workplace }}</p>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+{% endblock %}

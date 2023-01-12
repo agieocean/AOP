@@ -1,0 +1,10 @@
+{% extends "shared/base.html" %}
+{% block body %}
+{% include "aopcore/shared/nav.html" %}
+    <form action="/intake/aop-workplace/" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button class="btn waves-effect waves-light" type="submit" name="action">Submit</button>
+        <br/>
+    </form>
+{% endblock %}

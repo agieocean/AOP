@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  aop:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8001:80"
+    depends_on:
+      - mongo-db
+    networks:
+      - djangonetwork
+    environment:
+      -  WAIT_HOSTS='mongo:27017'
+    command: python3 manage.py runserver 0.0.0.0:8000
+  mongo-db:
+    image: mongo:3.4.2
+    environment:
+        # provide your credentials here
+        - MONGO_INITDB_ROOT_USERNAME=djsfa905rasjfd
+        - MONGO_INITDB_ROOT_PASSWORD=asfdh90a8sffasj90
+        - MONGO_INITDB_DATABASE=prodLL
+    hostname: mongo-db
+    #ports:
+    #  - "27017:27017"
+    volumes:
+      -  ./mongo-data:/data/db
+    networks:
+      - djangonetwork 
+networks:
+      djangonetwork:
+          driver: bridge

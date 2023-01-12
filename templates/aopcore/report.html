@@ -1,0 +1,61 @@
+{% extends "shared/base.html" %}
+{% block head %}
+<script>
+    $(document).ready(function () {
+            $('.datepicker').datepicker();
+            $('select').formSelect();
+        });
+</script>
+{% endblock %}
+{% block body %}
+{% include "aopcore/shared/nav.html" %}
+{% if alert %}
+<p style="color:red">{{ alert }}</p>
+{% endif %}
+<form action="/intake/aop-report/" method="post">
+    {% csrf_token %}
+    <input id="abuserName" name="abuserName" type="text" class="validate">
+    <label for="abuserName">Abuser Name</label>
+    <br>
+    <h5>Or</h5>
+    <br>
+    <label for="abuserChoice">Abuser Choice</label>
+    {{ form.abuserChoice }}
+    <input id="workplace" name="workplace" type="text" class="validate">
+    <label for="workplace">Workplace</label>
+    <br>
+    <h5>Or</h5>
+    <br>
+    <label for="workplaceChoice">Workplace Choice</label>
+    {{ form.workplaceChoice }}
+    <textarea id="fullText" name="fullText" class="materialize-textarea" required=""></textarea>
+    <label for="fullText">Full text of report (describe incident/s)</label>
+    <input id="typeOf" name="typeOf" type="text" class="validate" required="">
+    <label for="typeOf">Type of abuse</label>
+    <input type="text" class="datepicker" id="dateOf" name="dateOf" required="">
+    <label for="dateOf">Date abuse started/occured</label>
+    <br>
+    <label>
+        <input type="checkbox" id="ongoing" name="ongoing"/>
+        <span>Is abuse ongoing?</span>
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" id="helpRequested" name="helpRequested"/>
+        <span>Do you need help?</span>
+      </label>
+      <br>
+      <input id="typeHelpRequested" name="typeHelpRequested" type="text" class="validate">
+      <label for="typeHelpRequested">What type of help do you need?</label>
+      <input id="helpComment" name="helpComment" type="text" class="validate">
+    <label for="helpComment">Any other comments regarding help?</label>
+    <input id="contactEmail" name="contactEmail" type="text" class="validate">
+    <label for="contactEmail">Contact email (we will only contact you if you requested help)</label>
+    <textarea id="donationDetails" name="donationDetails" class="materialize-textarea"></textarea>
+    <label for="donationDetails">Details on where to donate if you requested donations</label>
+    <br>
+    <br>
+    <button class="btn waves-effect waves-light" type="submit" name="action">Submit</button>
+    <br />
+</form>
+{% endblock %}

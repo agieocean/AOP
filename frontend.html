@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="static/css/materialize.min.css">
+    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="static/js/materialize.min.js"></script>
+    <script src="static/js/nunjucks.min.js"></script>
+
+    <script>
+        let jData;
+        let abusers;
+        let reports;
+        let workplaces;
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            // Handler for .ready() called.
+            nunjucks.configure('static/templates');
+            $("#loadData").submit(function (e) {
+                e.preventDefault();
+                if ($('#myFile').val()) {
+                    var importedFile = document.getElementById('myFile').files[0];
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        jData = JSON.parse(reader.result);
+                        var toShow = $("input[name=group1]:checked").val();
+                        $("#results").html("");
+                        var htmlToAdd = "";
+                        for (let i = 0; i < jData[toShow].length; i++) {
+                            let obj = jData[toShow][i];
+                            if (toShow == "abusers") {
+                                if (obj["workplace_choice_id"] != null) {
+                                    obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                        return tobj.sid == obj["workplace_choice_id"]
+                                    })
+                                }
+                            } else if (toShow == "reports") {
+                                if (obj["workplaceChoice_id"] != null) {
+                                    obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                        return tobj.sid == obj["workplaceChoice_id"]
+                                    })
+                                }
+                                if (obj["abuserChoice_id"] != null) {
+                                    obj["abuserChoice"] = jData["abusers"].filter(tobj => {
+                                        return tobj.sid == obj["abuserChoice_id"]
+                                    })
+                                }
+                            }
+                            htmlToAdd += nunjucks.render(toShow.slice(0, -1) + '.html', obj);
+                        }
+                        $("#results").html(htmlToAdd);
+                        var toShowOpts = toShow + "_opts";
+                        $("#" + toShowOpts).show();
+                    };
+                    reader.readAsText(importedFile);
+                } else {
+                    $.ajax({
+                        url: "https://f004.backblazeb2.com/file/aop-bucket/currentdb.json",
+                        type: "GET",
+                        dataType: 'json',
+                        success: function (data) {
+                            jData = data;
+                            $("#downloadButton").html("<a class='waves-effect waves-light btn' download='data.json' href='data:application/json,"
+                                + encodeURIComponent(JSON.stringify(jData)) + "'>Download data</a>");
+                            abusers = data["abusers"];
+                            reports = data["reports"];
+                            workPlaces = data["workplaces"];
+                            var toShow = $("input[name=group1]:checked").val();
+                            $("#results").html("");
+                            var htmlToAdd = "";
+                            for (let i = 0; i < jData[toShow].length; i++) {
+                                let obj = jData[toShow][i];
+                                if (toShow == "abusers") {
+                                    if (obj["workplace_choice_id"] != null) {
+                                        obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                            return tobj.sid == obj["workplace_choice_id"]
+                                        })
+                                    }
+                                } else if (toShow == "reports") {
+                                    if (obj["workplaceChoice_id"] != null) {
+                                        obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                            return tobj.sid == obj["workplaceChoice_id"]
+                                        })
+                                    }
+                                    if (obj["abuserChoice_id"] != null) {
+                                        obj["abuserChoice"] = jData["abusers"].filter(tobj => {
+                                            return tobj.sid == obj["abuserChoice_id"]
+                                        })
+                                    }
+                                }
+                                htmlToAdd += nunjucks.render(toShow.slice(0, -1) + '.html', obj);
+                            }
+                            $("#results").html(htmlToAdd);
+                            var toShowOpts = toShow + "_opts";
+                            $("#" + toShowOpts).show();
+                        }
+                    });
+                }
+            });
+            $("input[name=group1]").on("change", function () {
+                var opts = ["abusers_opts", "reports_opts", "workplaces_opts"];
+                var toShow = $("input[name=group1]:checked").val();
+                $("#results").html("");
+                var htmlToAdd = "";
+                for (let i = 0; i < jData[toShow].length; i++) {
+                    let obj = jData[toShow][i];
+                    if (toShow == "abusers") {
+                        if (obj["workplace_choice_id"] != null) {
+                            obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                return tobj.sid == obj["workplace_choice_id"]
+                            })
+                            if (obj["workplace_choice"].length > 0) {
+                                obj["workplace_choiceHtml"] = nunjucks.render('workplace.html', obj["workplaceChoice"][0]);
+                            }
+                        }
+                    } else if (toShow == "reports") {
+                        if (obj["workplaceChoice_id"] != null) {
+                            obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                return tobj.sid == obj["workplaceChoice_id"]
+                            })
+                            if (obj["workplaceChoice"].length > 0) {
+                                obj["workplaceChoiceHtml"] = nunjucks.render('workplace.html', obj["workplaceChoice"][0]);
+                            }
+                        }
+                        if (obj["abuserChoice_id"] != null) {
+                            obj["abuserChoice"] = jData["abusers"].filter(tobj => {
+                                return tobj.sid == obj["abuserChoice_id"]
+                            })
+                            //console.log(obj["abuserChoice"]);
+                            if (obj["abuserChoice"].length > 0) {
+                                obj["abuserChoiceHtml"] = nunjucks.render('abuser.html', obj["abuserChoice"][0]);
+                            }
+                        }
+                    }
+                    htmlToAdd += nunjucks.render(toShow.slice(0, -1) + '.html', obj);
+                }
+                $("#results").html(htmlToAdd);
+                var toShowOpts = toShow + "_opts";
+                opts.splice(opts.indexOf(toShowOpts), 1);
+                $("#" + opts[0]).hide();
+                $("#" + opts[1]).hide();
+                $("#" + toShowOpts).show();
+                $("#filter_vals_div").hide();
+            });
+            $("input[name=opts]").on("change", function () {
+                var sopts = ["check_search_div", "text_search_div"];
+                var ts = $("input[name=opts]:checked").attr("stype");
+                ts = ts + "_search_div";
+                sopts.splice(sopts.indexOf(ts), 1);
+                $("#" + sopts[0]).hide();
+                $("#" + ts).show();
+                $("#filter_vals_div").show();
+            });
+            $("#filter").submit(function (e) {
+                e.preventDefault();
+                var toSearch = $("input[name=group1]:checked").val();
+                var toSearchFor = $("input[name=opts]:checked").val();
+                var typeSearch = $("input[name=opts]:checked").attr("stype");
+                $("#results").html("");
+                var htmlToAdd = "";
+                for (let i = 0; i < jData[toSearch].length; i++) {
+                    let obj = jData[toSearch][i];
+                    if (toShow == "abusers") {
+                        if (obj["workplace_choice_id"] != null) {
+                            obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                return tobj.sid == obj["workplace_choice_id"]
+                            })
+                        }
+                    } else if (toShow == "reports") {
+                        if (obj["workplaceChoice_id"] != null) {
+                            obj["workplaceChoice"] = jData["workplaces"].filter(tobj => {
+                                return tobj.sid == obj["workplaceChoice_id"]
+                            })
+                        }
+                        if (obj["abuserChoice_id"] != null) {
+                            obj["abuserChoice"] = jData["abusers"].filter(obj => {
+                                return tobj.sid == obj["abuserChoice_id"]
+                            })
+                        }
+                    }
+                    if (typeSearch == "check") {
+                        var val = $("#check_search").is(":checked");
+                        if (obj[toSearchFor] === val) {
+                            htmlToAdd += nunjucks.render(toSearch.slice(0, -1) + '.html', obj);
+                        }
+                    } else if (typeSearch == "text") {
+                        var val = $("#text_search").val();
+                        if (obj[toSearchFor].indexOf(val) != -1) {
+                            htmlToAdd += nunjucks.render(toSearch.slice(0, -1) + '.html', obj);
+                        }
+                    }
+                }
+                $("#results").html(htmlToAdd);
+            });
+        });
+    </script>
+    <style>
+        .card {
+            padding: 10px;
+        }
+
+        .brand-logo {
+            font-size: 15px !important;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AOP Database</title>
+    <link rel="icon" type="image/png" href="static/imgs/logo.png" />
+</head>
+
+<body>
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="https://aop.wizdev.co/intake/aop-abuser">Abuser</a></li>
+        <li><a href="https://aop.wizdev.co/intake/aop-report">Report</a></li>
+        <li><a href="https://aop.wizdev.co/intake/aop-workplace">Workplace</a></li>
+        <li><a href="https://aopwi.zohodesk.com/portal/en/newticket">Get support</a></li>
+    </ul>
+    <nav>
+        <div class="nav-wrapper amber lighten-5">
+            <a href="#" class="brand-logo center black-text">&nbsp;Abuse Of Power: Intake</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger black-text">Menu</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li>Report:</li>
+                <li><a href="https://aop.wizdev.co/intake/aop-abuser" class="black-text">Abuser</a></li>
+                <li><a href="https://aop.wizdev.co/intake/aop-report" class="black-text">Report</a></li>
+                <li><a href="https://aop.wizdev.co/intake/aop-workplace" class="black-text">Workplace</a></li>
+                <li><a href="https://aopwi.zohodesk.com/portal/en/newticket" class="black-text">Get support</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col s4">
+                <p style="color:red">Do this first, if you do not load the data first the page will not work. If you do
+                    not know what to do just click "Load Data"</p>
+                <form id="loadData" method="POST" enctype="multipart/form-data">
+                    Upload data (only upload data gotten from the Download button later in this section):<input
+                        class="btn waves-effect waves-light" type="file" id="myFile" name="filename">
+                    <button class="btn waves-effect waves-light" type="submit" name="action">Load Data
+                    </button>
+                    <div id="downloadButton">
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <form id="filter">
+                <div class="col s4">
+                    <p>
+                        <label>
+                            <input name="group1" type="radio" value="abusers" />
+                            <span>Abusers</span>
+                        </label>
+                    </p>
+                    <p>
+                        <label>
+                            <input name="group1" type="radio" value="reports" />
+                            <span>Reports</span>
+                        </label>
+                    </p>
+                    <p>
+                        <label>
+                            <input name="group1" type="radio" value="workplaces" />
+                            <span>Workplaces</span>
+                        </label>
+                    </p>
+                </div>
+                <div class="col s4">
+                    <div id="abusers_opts" hidden>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="name" stype="text" />
+                                <span>Name</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="occupation" stype="text" />
+                                <span>Occupation</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="workplace" stype="text" />
+                                <span>Workplace</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="badgeOr" stype="text" />
+                                <span>Badge or other identifying information</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="sid" stype="text" />
+                                <span>Support ID</span>
+                            </label>
+                        </p>
+                    </div>
+                    <div id="reports_opts" hidden>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="abuserName" stype="text" />
+                                <span>Abuser Name</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="fullText" stype="text" />
+                                <span>Text of report</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="typeOf" stype="text" />
+                                <span>Type of abuse</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="ongoing" stype="check" />
+                                <span>Is abuse ongoing</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="helpRequested" stype="check" />
+                                <span>Help requested</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="sid" stype="text" />
+                                <span>Support ID</span>
+                            </label>
+                        </p>
+                    </div>
+                    <div id="workplaces_opts" hidden>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="name" stype="text" />
+                                <span>Name</span>
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input name="opts" type="radio" value="sid" stype="text" />
+                                <span>Address</span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+                <div class="col s4" id="filter_vals_div" hidden>
+                    <div id="text_search_div" hidden>
+                        <input placeholder="" id="text_search" type="text" class="validate">
+                        <label for="search">Text search</label>
+                    </div>
+                    <p id="check_search_div" hidden>
+                        <label>
+                            <input type="checkbox" id="check_search" />
+                            <span>Boolean search</span>
+                        </label>
+                    </p>
+                    <div id="search_button_div">
+                        <button class="btn waves-effect waves-light" type="submit" name="action"
+                            id="search_button">Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row" id="results"></div>
+    </div>
+</body>
+
+</html>
