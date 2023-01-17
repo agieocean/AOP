@@ -12,6 +12,7 @@
         let abusers;
         let reports;
         let workplaces;
+        let dbFile = "https://f004.backblazeb2.com/file/aop-bucket/currentdb.json";
         $(document).ready(function () {
             $('.sidenav').sidenav();
             // Handler for .ready() called.
@@ -55,7 +56,7 @@
                     reader.readAsText(importedFile);
                 } else {
                     $.ajax({
-                        url: "https://f004.backblazeb2.com/file/aop-bucket/currentdb.json",
+                        url: dbFile,
                         type: "GET",
                         dataType: 'json',
                         success: function (data) {

@@ -16,8 +16,8 @@ services:
     image: mongo:3.4.2
     environment:
         # provide your credentials here
-        - MONGO_INITDB_ROOT_USERNAME=djsfa905rasjfd
-        - MONGO_INITDB_ROOT_PASSWORD=asfdh90a8sffasj90
+        - MONGO_INITDB_ROOT_USERNAME=
+        - MONGO_INITDB_ROOT_PASSWORD=
         - MONGO_INITDB_DATABASE=prodLL
     hostname: mongo-db
     #ports:
